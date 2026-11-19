@@ -20,7 +20,7 @@ body.night{filter:brightness(.45) saturate(.8)}
 .col{display:flex;flex-direction:column;gap:2.5vh;min-width:0}
 .panel{position:relative;border:1px solid var(--dim);background:linear-gradient(135deg,rgba(51,230,255,.06),rgba(51,230,255,.01));padding:1.6vh 1.4vw;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px))}
 .panel::before{content:"";position:absolute;top:0;left:0;width:30%;height:2px;background:var(--c);box-shadow:0 0 10px var(--c)}
-.lbl{font-family:'Orbitron',sans-serif;font-size:clamp(9px,1.6vh,13px);letter-spacing:.25em;opacity:.7;margin-bottom:.8vh;display:flex;justify-content:space-between}
+.lbl{flex-wrap:wrap;gap:2px 8px;font-family:'Orbitron',sans-serif;font-size:clamp(9px,1.6vh,13px);letter-spacing:.25em;opacity:.7;margin-bottom:.8vh;display:flex;justify-content:space-between}
 .big{font-family:'Orbitron',sans-serif;font-weight:600;font-size:clamp(22px,6vh,52px);line-height:1;text-shadow:0 0 14px rgba(51,230,255,.6)}
 .sub{font-size:clamp(12px,2.4vh,20px);opacity:.85;margin-top:.6vh}
 .row{display:flex;justify-content:space-between;gap:1vw;font-size:clamp(11px,2.1vh,17px);opacity:.85;margin-top:.4vh}
@@ -66,7 +66,10 @@ button:active{background:rgba(51,230,255,.25)}
 #ring .big{font-size:min(18vh,15vw)}
 @media (orientation:portrait){
  #app{grid-template-columns:1fr 1fr;grid-template-rows:auto auto auto;padding:4vh 4vw}
- #reactor{grid-column:1/-1;grid-row:1;width:min(88vw,52vh);justify-self:center}
+ #reactor{grid-column:1/-1;grid-row:1;width:min(84vw,44vh);justify-self:center}
+ #bar{position:fixed;left:0;right:0;bottom:0;padding:1vh 3vw 1.5vh;background:linear-gradient(rgba(2,6,10,0),rgba(2,6,10,.96) 35%);z-index:4}
+ #app{padding-bottom:17vh;align-content:start;row-gap:2vh}
+ #say{max-width:94vw}#input{width:94vw}#input input{font-size:16px}
  #time{font-size:15vw}#secs{font-size:3.5vw}#date{font-size:3.4vw}#stat{font-size:2.2vw}
  .col{gap:2vh}
 }
@@ -154,7 +157,7 @@ button:active{background:rgba(51,230,255,.25)}
     <label>Nome do assistente<input id="cName"></label>
     <label>Chave da API do Gemini<input id="cKey" type="password" placeholder="AIza..."><small>Pegue grátis em aistudio.google.com → Get API key</small></label>
     <label>Modelo do Gemini<input id="cModel"><small>Padrão: gemini-2.5-flash</small></label>
-    <label>Tópico ntfy (status da rota)<input id="cTopic" placeholder="ex: luis-rota-8k2x"><small>O PC publica aqui o resultado da rota</small></label>
+    <label>Tópico ntfy (status da rota)<input id="cTopic" placeholder="ex: renee-rota-8k2x"><small>O PC publica aqui o resultado da rota</small></label>
     <label>Cidade<input id="cCity"></label>
     <label>Latitude<input id="cLat" inputmode="decimal"></label>
     <label>Longitude<input id="cLon" inputmode="decimal"></label>
