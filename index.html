@@ -1,0 +1,380 @@
+TESTE<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#02060a">
+<meta name="mobile-web-app-capable" content="yes">
+<title>JARVIS · Relógio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Rajdhani:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--c:#33e6ff;--c2:#0a84ff;--dim:rgba(51,230,255,.28);--faint:rgba(51,230,255,.08);--bg:#02060a;--ok:#3dffa0;--warn:#ffb020;--bad:#ff4d6a}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--c);font-family:'Rajdhani',system-ui,sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent;user-select:none}
+body{background:radial-gradient(ellipse at center,#06202b 0%,var(--bg) 65%);transition:filter 1.5s}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(var(--faint) 1px,transparent 1px),linear-gradient(90deg,var(--faint) 1px,transparent 1px);background-size:40px 40px;mask-image:radial-gradient(ellipse at center,#000 20%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at center,#000 20%,transparent 75%)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px)}
+body.night{filter:brightness(.45) saturate(.8)}
+#app{position:relative;display:grid;grid-template-columns:1fr auto 1fr;grid-template-rows:1fr auto;height:100vh;padding:3vh 3vw 2vh;gap:1.5vh 2.5vw;align-items:center}
+.col{display:flex;flex-direction:column;gap:2.5vh;min-width:0}
+.panel{position:relative;border:1px solid var(--dim);background:linear-gradient(135deg,rgba(51,230,255,.06),rgba(51,230,255,.01));padding:1.6vh 1.4vw;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px))}
+.panel::before{content:"";position:absolute;top:0;left:0;width:30%;height:2px;background:var(--c);box-shadow:0 0 10px var(--c)}
+.lbl{font-family:'Orbitron',sans-serif;font-size:clamp(9px,1.6vh,13px);letter-spacing:.25em;opacity:.7;margin-bottom:.8vh;display:flex;justify-content:space-between}
+.big{font-family:'Orbitron',sans-serif;font-weight:600;font-size:clamp(22px,6vh,52px);line-height:1;text-shadow:0 0 14px rgba(51,230,255,.6)}
+.sub{font-size:clamp(12px,2.4vh,20px);opacity:.85;margin-top:.6vh}
+.row{display:flex;justify-content:space-between;gap:1vw;font-size:clamp(11px,2.1vh,17px);opacity:.85;margin-top:.4vh}
+#reactor{position:relative;width:min(68vh,40vw);aspect-ratio:1;cursor:pointer}
+#reactor svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.r{transform-box:fill-box;transform-origin:center;animation:spin 30s linear infinite}
+.r2{animation-duration:55s;animation-direction:reverse}.r3{animation-duration:18s}.r4{animation-duration:90s;animation-direction:reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+body.listening .r{animation-duration:4s}body.listening .r2{animation-duration:6s}
+body.thinking .r{animation-duration:2s}body.thinking{--c:#6ea8ff}
+body.speaking #core{animation:pulse .5s ease-in-out infinite alternate}
+body.alarm{--c:var(--warn)}
+@keyframes pulse{from{opacity:.35;transform:scale(.97)}to{opacity:1;transform:scale(1.03)}}
+#core{transform-box:fill-box;transform-origin:center;transition:transform .08s}
+#center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+#time{font-family:'Orbitron',sans-serif;font-weight:800;font-size:min(13vh,8vw);letter-spacing:.04em;text-shadow:0 0 20px var(--c),0 0 50px rgba(51,230,255,.35)}
+#secs{font-family:'Orbitron',sans-serif;font-size:min(3.2vh,2vw);opacity:.75;margin-top:-.5vh;letter-spacing:.3em}
+#date{font-size:min(3vh,1.9vw);letter-spacing:.2em;text-transform:uppercase;margin-top:1.2vh;opacity:.85}
+#stat{font-family:'Orbitron',sans-serif;font-size:min(1.9vh,1.2vw);letter-spacing:.4em;margin-top:1.6vh;opacity:.6}
+#bar{grid-column:1/-1;display:flex;flex-direction:column;gap:1vh;align-items:center}
+#say{min-height:3.4vh;max-width:80vw;text-align:center;font-size:clamp(13px,2.7vh,22px);letter-spacing:.03em;text-shadow:0 0 8px rgba(51,230,255,.5)}
+#say .you{opacity:.55;display:block;font-size:.8em}
+#input{display:flex;gap:10px;width:min(720px,80vw)}
+#input input{flex:1;background:rgba(51,230,255,.05);border:1px solid var(--dim);color:var(--c);font:inherit;font-size:clamp(13px,2.4vh,18px);padding:1vh 1vw;outline:none;letter-spacing:.05em}
+#input input::placeholder{color:var(--c);opacity:.4}
+button{background:rgba(51,230,255,.08);border:1px solid var(--dim);color:var(--c);font-family:'Orbitron',sans-serif;font-size:clamp(10px,1.8vh,14px);letter-spacing:.15em;padding:1vh 1.2vw;cursor:pointer}
+button:active{background:rgba(51,230,255,.25)}
+#gear{position:fixed;top:2vh;right:2vw;background:none;border:none;font-size:22px;opacity:.5;z-index:5;padding:6px}
+.ok{color:var(--ok);text-shadow:0 0 10px var(--ok)}.warn{color:var(--warn);text-shadow:0 0 10px var(--warn)}.bad{color:var(--bad)}
+.alist div{display:flex;justify-content:space-between;font-size:clamp(11px,2vh,16px);opacity:.8}
+.overlay{position:fixed;inset:0;background:rgba(2,6,10,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3vh;z-index:10;text-align:center}
+.hidden{display:none!important}
+#start h1{font-family:'Orbitron',sans-serif;font-size:min(9vh,9vw);letter-spacing:.3em;text-shadow:0 0 30px var(--c)}
+#start p{letter-spacing:.4em;opacity:.7;animation:pulse 1.2s infinite alternate}
+#settings{overflow:auto;justify-content:flex-start;padding:4vh 4vw}
+#settings .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px 24px;width:min(900px,92vw);text-align:left}
+#settings label{display:flex;flex-direction:column;gap:4px;font-size:14px;letter-spacing:.1em;opacity:.9}
+#settings input{background:rgba(51,230,255,.05);border:1px solid var(--dim);color:var(--c);font:inherit;font-size:16px;padding:8px}
+#settings h2{font-family:'Orbitron',sans-serif;letter-spacing:.3em;font-size:20px}
+#settings small{opacity:.6;letter-spacing:.05em}
+#alarmEdit{width:min(900px,92vw);text-align:left}
+#alarmEdit .alist div{padding:6px 0;border-bottom:1px solid var(--faint);align-items:center}
+#ring .big{font-size:min(18vh,15vw)}
+@media (orientation:portrait){
+ #app{grid-template-columns:1fr 1fr;grid-template-rows:auto auto auto;padding:4vh 4vw}
+ #reactor{grid-column:1/-1;grid-row:1;width:min(88vw,52vh);justify-self:center}
+ #time{font-size:15vw}#secs{font-size:3.5vw}#date{font-size:3.4vw}#stat{font-size:2.2vw}
+ .col{gap:2vh}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="col">
+    <div class="panel">
+      <div class="lbl"><span>CLIMA</span><span id="city">SÃO PAULO</span></div>
+      <div class="big"><span id="wIcon">·</span> <span id="wTemp">--</span>°</div>
+      <div class="sub" id="wDesc">carregando...</div>
+      <div class="row"><span>MÍN <b id="wMin">--</b>°</span><span>MÁX <b id="wMax">--</b>°</span><span>CHUVA <b id="wRain">--</b>%</span></div>
+      <div class="row"><span>AMANHÃ</span><span id="wTom">--</span></div>
+    </div>
+    <div class="panel">
+      <div class="lbl"><span>SISTEMA</span><span id="net">ONLINE</span></div>
+      <div class="row"><span>BATERIA</span><span id="bat">--</span></div>
+      <div class="row"><span>IA</span><span id="aiStat">--</span></div>
+    </div>
+  </div>
+
+  <div id="reactor" title="Toque para falar">
+    <svg viewBox="0 0 400 400">
+      <defs>
+        <radialGradient id="glow"><stop offset="0" stop-color="#33e6ff" stop-opacity=".22"/><stop offset=".7" stop-color="#33e6ff" stop-opacity=".04"/><stop offset="1" stop-color="#33e6ff" stop-opacity="0"/></radialGradient>
+      </defs>
+      <circle cx="200" cy="200" r="198" fill="url(#glow)"/>
+      <g class="r r1"><circle cx="200" cy="200" r="188" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="70 14 8 14" opacity=".75"/></g>
+      <circle id="secArc" cx="200" cy="200" r="176" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="1105.8" stroke-dashoffset="1105.8" transform="rotate(-90 200 200)" opacity=".9" style="filter:drop-shadow(0 0 6px #33e6ff)"/>
+      <g class="r r2"><circle cx="200" cy="200" r="163" fill="none" stroke="currentColor" stroke-width="9" stroke-dasharray="2 7" opacity=".45"/></g>
+      <g class="r r3"><circle cx="200" cy="200" r="147" fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="190 30 40 30" opacity=".8"/></g>
+      <g class="r r4"><circle cx="200" cy="200" r="133" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 5" opacity=".6"/></g>
+      <g id="core"><circle cx="200" cy="200" r="122" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".55"/></g>
+    </svg>
+    <div id="center">
+      <div id="time">--:--</div>
+      <div id="secs">00</div>
+      <div id="date">--</div>
+      <div id="stat">SISTEMAS ONLINE</div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="panel">
+      <div class="lbl"><span>PRÓXIMO ALARME</span><span id="aCount"></span></div>
+      <div class="big" id="aNext">--:--</div>
+      <div class="sub" id="aLabel">nenhum alarme</div>
+      <div class="alist" id="aList"></div>
+    </div>
+    <div class="panel">
+      <div class="lbl"><span>ROTA SHOPEE</span><span id="rTime"></span></div>
+      <div class="sub" id="rStatus">aguardando janela 00:00–00:30</div>
+    </div>
+  </div>
+
+  <div id="bar">
+    <div id="say"></div>
+    <div id="input">
+      <input id="txt" placeholder="Digite uma mensagem ou toque no círculo para falar..." autocomplete="off">
+      <button id="send">ENVIAR</button>
+      <button id="mic">🎙</button>
+    </div>
+  </div>
+</div>
+
+<button id="gear" title="Configurações">⚙</button>
+
+<div id="start" class="overlay">
+  <h1 id="startName">J.A.R.V.I.S.</h1>
+  <p>TOQUE PARA INICIAR</p>
+</div>
+
+<div id="ring" class="overlay hidden">
+  <div class="lbl" style="font-size:2.5vh">ALARME</div>
+  <div class="big" id="ringTime">--:--</div>
+  <div class="sub" id="ringLabel"></div>
+  <div style="display:flex;gap:20px"><button id="stopA" style="font-size:3vh;padding:2vh 4vw">PARAR</button><button id="snooze" style="font-size:3vh;padding:2vh 4vw">SONECA 9 MIN</button></div>
+</div>
+
+<div id="settings" class="overlay hidden">
+  <h2>CONFIGURAÇÕES</h2>
+  <div class="grid">
+    <label>Seu nome<input id="cUser"></label>
+    <label>Nome do assistente<input id="cName"></label>
+    <label>Chave da API do Gemini<input id="cKey" type="password" placeholder="AIza..."><small>Pegue grátis em aistudio.google.com → Get API key</small></label>
+    <label>Modelo do Gemini<input id="cModel"><small>Padrão: gemini-2.5-flash</small></label>
+    <label>Tópico ntfy (status da rota)<input id="cTopic" placeholder="ex: luis-rota-8k2x"><small>O PC publica aqui o resultado da rota</small></label>
+    <label>Cidade<input id="cCity"></label>
+    <label>Latitude<input id="cLat" inputmode="decimal"></label>
+    <label>Longitude<input id="cLon" inputmode="decimal"></label>
+  </div>
+  <div id="alarmEdit">
+    <h2 style="font-size:16px;margin:10px 0">ALARMES</h2>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <input id="nTime" type="time" style="background:rgba(51,230,255,.05);border:1px solid var(--dim);color:var(--c);font-size:16px;padding:8px">
+      <input id="nLabel" placeholder="rótulo" style="background:rgba(51,230,255,.05);border:1px solid var(--dim);color:var(--c);font-size:16px;padding:8px;flex:1;min-width:120px">
+      <label style="flex-direction:row;align-items:center;gap:6px"><input id="nRep" type="checkbox"> todo dia</label>
+      <button id="nAdd">ADICIONAR</button>
+    </div>
+    <div class="alist" id="aEditList" style="margin-top:10px"></div>
+  </div>
+  <div style="display:flex;gap:16px"><button id="testVoice">TESTAR VOZ</button><button id="save">SALVAR E FECHAR</button></div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+function load(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
+function store(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+const cfg=Object.assign({user:'Luis',name:'JARVIS',key:'',model:'gemini-2.5-flash',topic:'',city:'São Paulo',lat:-23.55,lon:-46.63},load('jv_cfg',{}));
+let alarms=load('jv_alarms',[]);
+let fired=load('jv_fired',{});
+let route=load('jv_route',null);
+let history=[];
+let weather=null,battery=null,state='idle',audioCtx=null,rec=null,ringing=null,beepTimer=null,wakeLock=null;
+const DIAS=['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+const MESES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const pad=n=>String(n).padStart(2,'0');
+const hm=d=>pad(d.getHours())+':'+pad(d.getMinutes());
+
+function ac(){if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();return audioCtx}
+function setState(s){state=s;document.body.classList.remove('listening','thinking','speaking');if(s!=='idle')document.body.classList.add(s);
+  $('#stat').textContent={idle:'SISTEMAS ONLINE',listening:'OUVINDO...',thinking:'PROCESSANDO...',speaking:'FALANDO'}[s]||''}
+
+/* ---------- RELÓGIO ---------- */
+function tick(){
+  const d=new Date();
+  $('#time').textContent=hm(d);
+  $('#secs').textContent=pad(d.getSeconds());
+  $('#date').textContent=`${DIAS[d.getDay()]} · ${d.getDate()} ${MESES[d.getMonth()]}`;
+  $('#secArc').style.strokeDashoffset=1105.8*(1-(d.getSeconds()+1)/60);
+  const h=d.getHours();document.body.classList.toggle('night',(h>=23||h<6)&&!ringing&&state==='idle');
+  checkAlarms(d);
+}
+
+/* ---------- ALARMES ---------- */
+function saveAlarms(){alarms.sort((a,b)=>a.hora.localeCompare(b.hora));store('jv_alarms',alarms);renderAlarms()}
+function addAlarm(hora,rotulo,repetir){if(!/^\d{1,2}:\d{2}$/.test(hora))return false;const [H,M]=hora.split(':');hora=pad(+H)+':'+M;
+  alarms.push({id:Date.now()+Math.random(),hora,rotulo:rotulo||'Alarme',repetir:!!repetir,ativo:true});saveAlarms();return true}
+function nextAlarm(){const now=new Date(),cur=now.getHours()*60+now.getMinutes();let best=null,bd=1e9;
+  alarms.filter(a=>a.ativo).forEach(a=>{const [H,M]=a.hora.split(':').map(Number);let diff=H*60+M-cur;if(diff<=0)diff+=1440;if(diff<bd){bd=diff;best=a}});return best?{a:best,mins:bd}:null}
+function renderAlarms(){
+  const n=nextAlarm();
+  $('#aNext').textContent=n?n.a.hora:'--:--';
+  $('#aLabel').textContent=n?`${n.a.rotulo} · em ${Math.floor(n.mins/60)}h${pad(n.mins%60)}`:'nenhum alarme';
+  const act=alarms.filter(a=>a.ativo);$('#aCount').textContent=act.length?act.length+' ATIVO'+(act.length>1?'S':''):'';
+  $('#aList').innerHTML=act.filter(a=>!n||a.id!==n.a.id).slice(0,3).map(a=>`<div><span>${a.hora}</span><span>${esc(a.rotulo)}</span></div>`).join('');
+  $('#aEditList').innerHTML=alarms.map(a=>`<div><span>${a.hora} · ${esc(a.rotulo)} ${a.repetir?'(todo dia)':''}</span><button data-del="${a.id}">REMOVER</button></div>`).join('')||'<div>nenhum alarme</div>';
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function checkAlarms(d){
+  if(ringing)return;const now=hm(d),day=d.toDateString();
+  for(const a of alarms){if(a.ativo&&a.hora===now&&fired[a.id]!==day){fired[a.id]=day;store('jv_fired',fired);if(!a.repetir){a.ativo=false;saveAlarms()}ring(a);break}}
+}
+function ring(a){
+  ringing=a;document.body.classList.add('alarm');document.body.classList.remove('night');
+  $('#ringTime').textContent=a.hora;$('#ringLabel').textContent=a.rotulo;$('#ring').classList.remove('hidden');
+  let i=0;beepTimer=setInterval(()=>{beep(880,.15);setTimeout(()=>beep(1175,.15),200);if(++i%8===0)say(`${cfg.user}, são ${a.hora}. ${a.rotulo}.`)},1000);
+}
+function stopRing(snooze){clearInterval(beepTimer);$('#ring').classList.add('hidden');document.body.classList.remove('alarm');
+  if(snooze){const t=new Date(Date.now()+9*60000);addAlarm(hm(t),'Soneca',false);say('Soneca de nove minutos.')}
+  else{const h=new Date().getHours();say(h<12?`Bom dia, ${cfg.user}. ${weatherLine()}`:'Alarme desligado.')}
+  ringing=null}
+function beep(f,dur){try{const c=ac(),o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(.5,c.currentTime+.02);g.gain.linearRampToValueAtTime(0,c.currentTime+dur);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+dur+.05)}catch(e){}}
+
+/* ---------- CLIMA (Open-Meteo, grátis) ---------- */
+const WMO={0:['☀','céu limpo'],1:['🌤','quase limpo'],2:['⛅','parcialmente nublado'],3:['☁','nublado'],45:['🌫','neblina'],48:['🌫','neblina'],51:['🌦','garoa fraca'],53:['🌦','garoa'],55:['🌦','garoa forte'],61:['🌧','chuva fraca'],63:['🌧','chuva'],65:['🌧','chuva forte'],80:['🌦','pancadas de chuva'],81:['🌧','pancadas de chuva'],82:['⛈','chuva muito forte'],95:['⛈','tempestade'],96:['⛈','tempestade com granizo'],99:['⛈','tempestade com granizo']};
+const wmo=c=>WMO[c]||['·','—'];
+async function loadWeather(){
+  try{const u=`https://api.open-meteo.com/v1/forecast?latitude=${cfg.lat}&longitude=${cfg.lon}&current=temperature_2m,weather_code,relative_humidity_2m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=2`;
+    const j=await (await fetch(u)).json();weather=j;
+    $('#city').textContent=cfg.city.toUpperCase();
+    $('#wTemp').textContent=Math.round(j.current.temperature_2m);
+    const [ic,ds]=wmo(j.current.weather_code);$('#wIcon').textContent=ic;$('#wDesc').textContent=`${ds} · umidade ${j.current.relative_humidity_2m}%`;
+    $('#wMin').textContent=Math.round(j.daily.temperature_2m_min[0]);$('#wMax').textContent=Math.round(j.daily.temperature_2m_max[0]);$('#wRain').textContent=j.daily.precipitation_probability_max[0]??'--';
+    $('#wTom').textContent=`${wmo(j.daily.weather_code[1])[0]} ${Math.round(j.daily.temperature_2m_min[1])}°/${Math.round(j.daily.temperature_2m_max[1])}° · ${j.daily.precipitation_probability_max[1]??'-'}%`;
+  }catch(e){$('#wDesc').textContent='sem conexão'}
+}
+function weatherLine(){if(!weather)return'';const c=weather.current,dl=weather.daily;return`Agora faz ${Math.round(c.temperature_2m)} graus em ${cfg.city}, ${wmo(c.weather_code)[1]}. Máxima de ${Math.round(dl.temperature_2m_max[0])} e ${dl.precipitation_probability_max[0]}% de chance de chuva.`}
+
+/* ---------- STATUS DA ROTA (ntfy) ---------- */
+let es=null;
+function setRoute(msg,t){route={msg,t};store('jv_route',route);renderRoute()}
+function renderRoute(){
+  if(!route){$('#rStatus').textContent=cfg.topic?'aguardando janela 00:00–00:30':'configure o tópico ntfy ⚙';$('#rStatus').className='sub';return}
+  const m=route.msg,l=m.toLowerCase();$('#rStatus').textContent=m;
+  $('#rStatus').className='sub '+(/✅|aceit/.test(l)?'ok':/⚠|alarme|não|nao|recus|erro/.test(l)?'warn':'');
+  const d=new Date(route.t*1000);$('#rTime').textContent=`${pad(d.getDate())}/${pad(d.getMonth()+1)} ${hm(d)}`;
+}
+async function connectRoute(){
+  if(es){es.close();es=null}if(!cfg.topic){renderRoute();return}
+  const base='https://ntfy.sh/'+encodeURIComponent(cfg.topic);
+  try{const txt=await (await fetch(base+'/json?poll=1&since=14h')).text();const lines=txt.trim().split('\n').filter(Boolean).map(l=>JSON.parse(l)).filter(x=>x.event==='message');
+    if(lines.length){const last=lines[lines.length-1];setRoute(last.message,last.time)}}catch(e){}
+  renderRoute();
+  es=new EventSource(base+'/sse');
+  es.onmessage=e=>{try{const d=JSON.parse(e.data);if(d.event==='message'){setRoute(d.message,d.time);beep(660,.2);setTimeout(()=>beep(990,.25),220)}}catch(x){}};
+}
+
+/* ---------- VOZ (fala) ---------- */
+let voice=null;
+function pickVoice(){const vs=speechSynthesis.getVoices();voice=vs.find(v=>/pt[-_]BR/i.test(v.lang)&&/male|masc|daniel|antonio|google/i.test(v.name))||vs.find(v=>/pt[-_]BR/i.test(v.lang))||vs.find(v=>/^pt/i.test(v.lang))||null}
+if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
+function say(t,you){
+  $('#say').innerHTML=(you?`<span class="you">› ${esc(you)}</span>`:'')+esc(t);
+  if(!('speechSynthesis' in window)||!t){setState('idle');return}
+  speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='pt-BR';if(voice)u.voice=voice;u.rate=1.05;u.pitch=.85;
+  u.onstart=()=>setState('speaking');u.onend=u.onerror=()=>{if(state==='speaking')setState('idle')};speechSynthesis.speak(u);
+}
+
+/* ---------- VOZ (escuta) -> WAV ---------- */
+async function startListen(){
+  if(!cfg.key){openSettings();say('Senhor, preciso da chave do Gemini nas configurações.');return}
+  if('speechSynthesis' in window)speechSynthesis.cancel();
+  let stream;try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}})}catch(e){say('Não consegui acessar o microfone.');return}
+  const c=ac(),src=c.createMediaStreamSource(stream),proc=c.createScriptProcessor(4096,1,1),t0=Date.now();
+  rec={stream,src,proc,chunks:[],rate:c.sampleRate,heard:false,silent:0};
+  proc.onaudioprocess=e=>{if(!rec)return;const d=e.inputBuffer.getChannelData(0);rec.chunks.push(new Float32Array(d));
+    let s=0;for(let i=0;i<d.length;i++)s+=d[i]*d[i];const rms=Math.sqrt(s/d.length);
+    $('#core').style.transform=`scale(${1+Math.min(rms*6,.25)})`;
+    if(rms>.025){rec.heard=true;rec.silent=0}else if(rec.heard){rec.silent=rec.silent||Date.now();if(Date.now()-rec.silent>1400)stopListen()}
+    if(Date.now()-t0>15000)stopListen();else if(!rec.heard&&Date.now()-t0>7000)stopListen(true)};
+  src.connect(proc);proc.connect(c.destination);setState('listening');beep(1200,.08);
+}
+function stopListen(cancel){
+  if(!rec)return;const r=rec;rec=null;try{r.proc.disconnect();r.src.disconnect()}catch(e){}r.stream.getTracks().forEach(t=>t.stop());$('#core').style.transform='';
+  if(cancel||!r.heard){setState('idle');$('#say').textContent='Não ouvi nada.';return}
+  beep(800,.08);const b64=toWav(r.chunks,r.rate);
+  ask([{text:'(Mensagem de voz do usuário. Transcreva no campo "ouvido" e responda.)'},{inline_data:{mime_type:'audio/wav',data:b64}}]);
+}
+function toWav(chunks,rate){
+  const len=chunks.reduce((a,c)=>a+c.length,0),all=new Float32Array(len);let o=0;chunks.forEach(c=>{all.set(c,o);o+=c.length});
+  const out=16000,ratio=rate/out,n=Math.floor(len/ratio),pcm=new Int16Array(n);
+  for(let i=0;i<n;i++){const s0=Math.floor(i*ratio),s1=Math.min(len,Math.floor((i+1)*ratio));let s=0;for(let j=s0;j<s1;j++)s+=all[j];const v=Math.max(-1,Math.min(1,s/Math.max(1,s1-s0)));pcm[i]=v<0?v*0x8000:v*0x7fff}
+  const buf=new ArrayBuffer(44+n*2),dv=new DataView(buf),w=(p,s)=>{for(let i=0;i<s.length;i++)dv.setUint8(p+i,s.charCodeAt(i))};
+  w(0,'RIFF');dv.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,1,true);dv.setUint32(24,out,true);dv.setUint32(28,out*2,true);dv.setUint16(32,2,true);dv.setUint16(34,16,true);w(36,'data');dv.setUint32(40,n*2,true);
+  new Int16Array(buf,44).set(pcm);
+  const bytes=new Uint8Array(buf);let bin='';for(let i=0;i<bytes.length;i+=0x8000)bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));return btoa(bin);
+}
+
+/* ---------- CÉREBRO (Gemini) ---------- */
+function context(){
+  const d=new Date();
+  return [`Agora: ${DIAS[d.getDay()]}, ${d.toLocaleDateString('pt-BR')} ${hm(d)}.`,
+    weather?`Clima em ${cfg.city}: ${weatherLine()} Amanhã: mín ${Math.round(weather.daily.temperature_2m_min[1])}, máx ${Math.round(weather.daily.temperature_2m_max[1])}, chuva ${weather.daily.precipitation_probability_max[1]}%.`:'Clima indisponível.',
+    `Alarmes: ${alarms.filter(a=>a.ativo).map(a=>a.hora+' ('+a.rotulo+(a.repetir?', todo dia':'')+')').join('; ')||'nenhum'}.`,
+    `Status da rota Shopee (aceite entre 00:00 e 00:30): ${route?route.msg+' (recebido '+new Date(route.t*1000).toLocaleString('pt-BR')+')':'nenhuma notícia ainda'}.`,
+    battery?`Bateria do relógio: ${Math.round(battery.level*100)}%${battery.charging?' carregando':''}.`:''].join('\n');
+}
+async function ask(parts,typed){
+  if(!cfg.key){openSettings();return}
+  setState('thinking');$('#say').innerHTML=typed?`<span class="you">› ${esc(typed)}</span>...`:'...';
+  const sys=`Você é ${cfg.name}, uma IA no estilo J.A.R.V.I.S. que vive num relógio de mesa inteligente ao lado da cama de ${cfg.user}. Fale português do Brasil, com tom de mordomo britânico de IA: educado, calmo, levemente espirituoso. Pode chamá-lo de "senhor" de vez em quando. Respostas CURTAS (1 a 3 frases), pois serão faladas em voz alta. Nada de emojis, listas ou markdown. Horários: escreva por extenso de forma natural.
+Contexto em tempo real:
+${context()}
+Você controla os alarmes. Responda SEMPRE apenas com JSON: {"ouvido":"transcrição exata do áudio do usuário, ou vazio se ele digitou","fala":"sua resposta","acoes":[]}
+Ações possíveis em "acoes": {"tipo":"criar_alarme","hora":"HH:MM","rotulo":"texto curto","repetir":false} | {"tipo":"remover_alarme","hora":"HH:MM"} | {"tipo":"remover_todos"}. Para "daqui X minutos", calcule a partir do horário atual. Se não entendeu o áudio, peça para repetir.`;
+  const body={system_instruction:{parts:[{text:sys}]},contents:[...history,{role:'user',parts}],generationConfig:{responseMimeType:'application/json',temperature:.7}};
+  try{
+    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(cfg.model)}:generateContent?key=${encodeURIComponent(cfg.key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const j=await r.json();if(!r.ok)throw new Error(j.error?.message||('HTTP '+r.status));
+    let raw=(j.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('').trim().replace(/^```(json)?|```$/g,'');
+    let res;try{res=JSON.parse(raw)}catch(e){res={fala:raw,acoes:[]}}
+    const heard=typed||res.ouvido||'';
+    (res.acoes||[]).forEach(doAction);
+    history.push({role:'user',parts:[{text:heard||'(áudio)'}]},{role:'model',parts:[{text:res.fala||''}]});history=history.slice(-16);
+    $('#aiStat').textContent='GEMINI OK';$('#aiStat').className='ok';
+    say(res.fala||'Feito.',heard);
+  }catch(e){$('#aiStat').textContent='ERRO';$('#aiStat').className='bad';setState('idle');say('Falha na conexão com o núcleo. '+(e.message||'').slice(0,90))}
+}
+function doAction(a){
+  if(!a||!a.tipo)return;
+  if(a.tipo==='criar_alarme')addAlarm(a.hora,a.rotulo,a.repetir);
+  else if(a.tipo==='remover_alarme'){alarms=alarms.filter(x=>x.hora!==a.hora);saveAlarms()}
+  else if(a.tipo==='remover_todos'){alarms=[];saveAlarms()}
+}
+
+/* ---------- CONFIG / UI ---------- */
+const F={cUser:'user',cName:'name',cKey:'key',cModel:'model',cTopic:'topic',cCity:'city',cLat:'lat',cLon:'lon'};
+function openSettings(){for(const id in F)$('#'+id).value=cfg[F[id]];renderAlarms();$('#settings').classList.remove('hidden')}
+$('#save').onclick=()=>{for(const id in F){let v=$('#'+id).value.trim();if(id==='cLat'||id==='cLon')v=parseFloat(v.replace(',','.'))||cfg[F[id]];cfg[F[id]]=v}
+  cfg.model=cfg.model||'gemini-2.5-flash';store('jv_cfg',cfg);$('#settings').classList.add('hidden');applyName();loadWeather();connectRoute();aiStat()};
+$('#testVoice').onclick=()=>say(`Olá ${$('#cUser').value||cfg.user}, todos os sistemas operacionais.`);
+$('#nAdd').onclick=()=>{if(addAlarm($('#nTime').value,$('#nLabel').value,$('#nRep').checked)){$('#nLabel').value=''}};
+$('#aEditList').onclick=e=>{const id=e.target.dataset.del;if(id){alarms=alarms.filter(a=>String(a.id)!==id);saveAlarms()}};
+$('#gear').onclick=openSettings;
+$('#stopA').onclick=()=>stopRing(false);$('#snooze').onclick=()=>stopRing(true);
+function toggleListen(){if(rec)stopListen();else if(state==='speaking'){speechSynthesis.cancel();setState('idle')}else if(state==='idle')startListen()}
+$('#reactor').onclick=toggleListen;$('#mic').onclick=toggleListen;
+function sendText(){const t=$('#txt').value.trim();if(!t||state==='thinking')return;$('#txt').value='';ask([{text:t}],t)}
+$('#send').onclick=sendText;$('#txt').onkeydown=e=>{if(e.key==='Enter')sendText()};
+function applyName(){$('#startName').textContent=cfg.name.toUpperCase().split('').join('.')+'.';document.title=cfg.name+' · Relógio'}
+function aiStat(){$('#aiStat').textContent=cfg.key?'GEMINI PRONTO':'SEM CHAVE ⚙';$('#aiStat').className=cfg.key?'':'warn'}
+async function keepAwake(){try{if('wakeLock' in navigator)wakeLock=await navigator.wakeLock.request('screen')}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){keepAwake();loadWeather()}});
+function netStat(){$('#net').textContent=navigator.onLine?'ONLINE':'OFFLINE';$('#net').className=navigator.onLine?'':'bad'}
+addEventListener('online',()=>{netStat();loadWeather();connectRoute()});addEventListener('offline',netStat);
+
+$('#start').onclick=()=>{
+  ac();keepAwake();try{document.documentElement.requestFullscreen?.()}catch(e){}
+  $('#start').classList.add('hidden');
+  const h=new Date().getHours(),g=h<5?'Boa madrugada':h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
+  say(`Sistemas online. ${g}, ${cfg.user}.`);
+};
+
+if(navigator.getBattery)navigator.getBattery().then(b=>{battery=b;const f=()=>{$('#bat').textContent=Math.round(b.level*100)+'%'+(b.charging?' ⚡':'')};f();b.onlevelchange=b.onchargingchange=f});
+applyName();aiStat();netStat();renderAlarms();renderRoute();tick();setInterval(tick,1000);setInterval(renderAlarms,30000);
+loadWeather();setInterval(loadWeather,15*60000);connectRoute();
+</script>
+</body>
+</html>
