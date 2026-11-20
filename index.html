@@ -228,12 +228,13 @@ function checkAlarms(d){
 function ring(a){
   ringing=a;document.body.classList.add('alarm');document.body.classList.remove('night');
   $('#ringTime').textContent=a.hora;$('#ringLabel').textContent=a.rotulo;$('#ring').classList.remove('hidden');
-  let i=0;beepTimer=setInterval(()=>{beep(880,.15);setTimeout(()=>beep(1175,.15),200);if(++i%8===0)say(`${cfg.user}, são ${a.hora}. ${a.rotulo}.`)},1000);
+  let i=0;beepTimer=setInterval(()=>{loud(1000,.12);setTimeout(()=>loud(1000,.12),180);setTimeout(()=>loud(1000,.12),360);setTimeout(()=>loud(1000,.12),540);if(++i%10===0)say(`${cfg.user}, são ${a.hora}. ${a.rotulo}.`)},1000);
 }
 function stopRing(snooze){clearInterval(beepTimer);$('#ring').classList.add('hidden');document.body.classList.remove('alarm');
   if(snooze){const t=new Date(Date.now()+9*60000);addAlarm(hm(t),'Soneca',false);say('Soneca de nove minutos.')}
   else{const h=new Date().getHours();say(h<12?`Bom dia, ${cfg.user}. ${weatherLine()}`:'Alarme desligado.')}
   ringing=null}
+function loud(f,dur){try{const c=ac();if(!window.__comp){const k=c.createDynamicsCompressor();k.threshold.value=-30;k.knee.value=0;k.ratio.value=20;k.attack.value=0;k.release.value=.1;const m=c.createGain();m.gain.value=2.2;k.connect(m);m.connect(c.destination);window.__comp=k}const t0=c.currentTime;[['square',f],['sawtooth',f*1.005],['square',f*2]].forEach(([tp,fr])=>{const o=c.createOscillator(),g=c.createGain();o.type=tp;o.frequency.value=fr;g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(1,t0+.01);g.gain.setValueAtTime(1,t0+dur-.02);g.gain.linearRampToValueAtTime(0,t0+dur);o.connect(g);g.connect(window.__comp);o.start(t0);o.stop(t0+dur+.05)})}catch(e){}}
 function beep(f,dur){try{const c=ac(),o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(.5,c.currentTime+.02);g.gain.linearRampToValueAtTime(0,c.currentTime+dur);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+dur+.05)}catch(e){}}
 
 /* ---------- CLIMA (Open-Meteo, grátis) ---------- */
