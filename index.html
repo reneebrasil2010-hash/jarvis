@@ -284,7 +284,7 @@ function say(t,you){
 
 /* ---------- VOZ (escuta) -> WAV ---------- */
 async function startListen(){
-  if(!cfg.key){openSettings();say('Senhora, preciso da chave do Gemini nas configurações.');return}
+  if(!cfg.key){openSettings();say('Senhor, preciso da chave do Gemini nas configurações.');return}
   if('speechSynthesis' in window)speechSynthesis.cancel();
   let stream;try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}})}catch(e){say('Não consegui acessar o microfone.');return}
   const c=ac(),src=c.createMediaStreamSource(stream),proc=c.createScriptProcessor(4096,1,1),t0=Date.now();
@@ -324,7 +324,7 @@ function context(){
 async function ask(parts,typed){
   if(!cfg.key){openSettings();return}
   setState('thinking');$('#say').innerHTML=typed?`<span class="you">› ${esc(typed)}</span>...`:'...';
-  const sys=`Você é ${cfg.name}, uma IA no estilo J.A.R.V.I.S. que vive num relógio de mesa inteligente ao lado da cama de ${cfg.user}. Fale português do Brasil, com tom de mordomo britânico de IA: educado, calmo, levemente espirituoso. Pode chamá-la de "senhora" de vez em quando. Respostas CURTAS (1 a 3 frases), pois serão faladas em voz alta. Nada de emojis, listas ou markdown. Horários: escreva por extenso de forma natural.
+  const sys=`Você é ${cfg.name}, uma IA no estilo J.A.R.V.I.S. que vive num relógio de mesa inteligente ao lado da cama de ${cfg.user}. Fale português do Brasil, com tom de mordomo britânico de IA: educado, calmo, levemente espirituoso. Ele é homem: trate-o sempre no masculino e pode chamá-lo de "senhor" de vez em quando. Respostas CURTAS (1 a 3 frases), pois serão faladas em voz alta. Nada de emojis, listas ou markdown. Horários: escreva por extenso de forma natural.
 Contexto em tempo real:
 ${context()}
 Você controla os alarmes. Responda SEMPRE apenas com JSON: {"ouvido":"transcrição exata do áudio do usuário, ou vazio se ele digitou","fala":"sua resposta","acoes":[]}
